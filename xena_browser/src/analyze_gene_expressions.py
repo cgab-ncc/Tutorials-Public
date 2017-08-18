@@ -12,14 +12,13 @@ contains the following information based on gene expression folder
 dwonloaded from UCSC Xena Browser
 """
 
-import sys
-sys.path.append("../")
 import Tkinter, tkFileDialog
 import gzip
 import os
 import numpy as np
 import errno
 from make_dataset import *
+import constants
 
 root = Tkinter.Tk()
 root.withdraw()
