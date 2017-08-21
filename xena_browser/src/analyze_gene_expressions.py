@@ -115,7 +115,9 @@ with gzip.open(zipped_gene_expression_file_path, 'r') as f:
         # Header - 2 (sample ids)
         csv_save_file.write("gene_name")
         for sample_id in gene_expression.get_samples_list():
-            csv_save_file.write("," + str(sample_id))
+            if gene_expression.get_sample_tissue_types_dict()[sample_id] == constants.SAMPLE_TYPE_TUMOR or \
+                gene_expression.get_sample_tissue_types_dict()[sample_id] == constants.SAMPLE_TYPE_NORMAL:
+                csv_save_file.write("," + str(sample_id))
         csv_save_file.write("\n")
         # Gene expression data and avg ratio
         genes_written = 0
