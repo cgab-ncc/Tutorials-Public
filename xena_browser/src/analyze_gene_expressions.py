@@ -16,6 +16,7 @@ import Tkinter, tkFileDialog
 import gzip
 import os
 import numpy as np
+import sys
 import errno
 from make_dataset import *
 import constants
@@ -62,9 +63,13 @@ with gzip.open(zipped_gene_expression_file_path, 'r') as f:
                                             float(np.mean(np.array(normal_samples_gene_expressions[gene_name])))
     print("\nFinished calculating average gene expression value ratio")
     # Write .csv files
+    save_dir = tkFileDialog.askdirectory()
+    root.update()
+    if save_dir is None:
+        exit()
     print("Started writing data to .csv files")
-    summary_file = os.getcwd() + "/results/analysis.csv"
-    raw_gene_exp_file = os.getcwd() + "/results/gene_expressions.csv"
+    summary_file = save_dir + "/results/analysis.csv"
+    raw_gene_exp_file = save_dir + "/results/gene_expressions.csv"
     # Create the files
     if not os.path.exists(os.path.dirname(summary_file)):
         try:
