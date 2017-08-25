@@ -17,7 +17,7 @@ import Tkinter, tkFileDialog
 
 # python 3.x
 # import tkinter as Tkinter
-# from _tkinter import filedialog as tkFileDialog
+# from tkinter import filedialog as tkFileDialog
 
 import gzip
 import os
