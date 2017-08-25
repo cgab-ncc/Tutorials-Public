@@ -12,7 +12,13 @@ contains the following information based on gene expression folder
 dwonloaded from UCSC Xena Browser
 """
 
+# python 2.7
 import Tkinter, tkFileDialog
+
+# python 3.x
+# import tkinter as Tkinter
+# from _tkinter import filedialog as tkFileDialog
+
 import gzip
 import os
 import numpy as np
@@ -61,8 +67,9 @@ with gzip.open(zipped_gene_expression_file_path, 'r') as f:
         else:
             avg_gene_exp_ratio[gene_name] = float(np.mean(np.array(tumor_samples_gene_expressions[gene_name]))) / \
                                             float(np.mean(np.array(normal_samples_gene_expressions[gene_name])))
-    print("\nFinished calculating average gene expression value ratio")
+    print("\nFinished calculating average gene expression value ratio\n\n")
     # Write .csv files
+    print("---> Please select the directory to which you want to save the analysis results.gene expression file downloaded from UCSC Xena Browser <---\n\n")
     save_dir = tkFileDialog.askdirectory()
     root.update()
     if save_dir is None:
@@ -89,12 +96,13 @@ with gzip.open(zipped_gene_expression_file_path, 'r') as f:
         # Header
         csv_save_file.write("gene_name,tumor_samples_count,normal_samples_count,avg(tumor),avg(normal),avg(tumor)/avg(normal),avg(tumor)=0_count,avg(normal)=0_count\n")
         # Gene expression data and avg ratio
-        genes_written = 0
+        genes_calculated = 0
         for gene_name in gene_expression.get_genes_list():
             if genes_calculated % 200 == 0:
                 progress_percentage = 100 * (float(genes_calculated) / float(len(gene_expression.get_genes_list())))
                 sys.stdout.write("\r%d%%" % progress_percentage)
                 sys.stdout.flush()
+            genes_calculated = genes_calculated + 1
             csv_save_file.write(str(gene_name))
             csv_save_file.write("," + str(len(tumor_samples_gene_expressions[gene_name])))
             csv_save_file.write("," + str(len(normal_samples_gene_expressions[gene_name])))
@@ -105,11 +113,11 @@ with gzip.open(zipped_gene_expression_file_path, 'r') as f:
             zero_gene_exp_values_normal = [a for a in normal_samples_gene_expressions[gene_name] if a == 0]
             csv_save_file.write("," + str(len(zero_gene_exp_values_tumor)))
             csv_save_file.write("," + str(len(zero_gene_exp_values_normal)) + "\n")
-    print("Finished writing data to analysis.csv file")
+    print("\nFinished writing data to analysis.csv file")
     print("Writing data to gene_expressions.csv file")
     with open(raw_gene_exp_file, "w") as csv_save_file:
         # Header - 1 (sample tissue type; tumor or normal)
-        csv_save_file.write("Tissue type (T=tumor;N=normal)")
+        csv_save_file.write("Tissue type (T=tumor and N=normal)")
         for sample_id in gene_expression.get_samples_list():
             if gene_expression.get_sample_tissue_types_dict()[sample_id] == constants.SAMPLE_TYPE_TUMOR:
                 csv_save_file.write(",T")
@@ -120,19 +128,26 @@ with gzip.open(zipped_gene_expression_file_path, 'r') as f:
         # Header - 2 (sample ids)
         csv_save_file.write("gene_name")
         for sample_id in gene_expression.get_samples_list():
-            if gene_expression.get_sample_tissue_types_dict()[sample_id] == constants.SAMPLE_TYPE_TUMOR or \
-                gene_expression.get_sample_tissue_types_dict()[sample_id] == constants.SAMPLE_TYPE_NORMAL:
+            if gene_expression.get_sample_tissue_types_dict()[sample_id] == constants.SAMPLE_TYPE_TUMOR:
+                csv_save_file.write("," + str(sample_id))
+        for sample_id in gene_expression.get_samples_list():
+            if gene_expression.get_sample_tissue_types_dict()[sample_id] == constants.SAMPLE_TYPE_NORMAL:
                 csv_save_file.write("," + str(sample_id))
         csv_save_file.write("\n")
         # Gene expression data and avg ratio
-        genes_written = 0
+        genes_calculated = 0
         for gene_name in gene_expression.get_genes_list():
             if genes_calculated % 200 == 0:
                 progress_percentage = 100 * (float(genes_calculated) / float(len(gene_expression.get_genes_list())))
                 sys.stdout.write("\r%d%%" % progress_percentage)
                 sys.stdout.flush()
+            genes_calculated = genes_calculated + 1
             csv_save_file.write(str(gene_name))
             for sample_id in gene_expression.get_samples_list():
-                csv_save_file.write("," + str(gene_expression.get_gene_exp_matrix_dataframe()[sample_id][gene_name]))
+                if gene_expression.get_sample_tissue_types_dict()[sample_id] == constants.SAMPLE_TYPE_TUMOR:
+                    csv_save_file.write("," + str(gene_expression.get_gene_exp_matrix_dataframe()[sample_id][gene_name]))
+            for sample_id in gene_expression.get_samples_list():
+                if gene_expression.get_sample_tissue_types_dict()[sample_id] == constants.SAMPLE_TYPE_NORMAL:
+                    csv_save_file.write("," + str(gene_expression.get_gene_exp_matrix_dataframe()[sample_id][gene_name]))
             csv_save_file.write("\n")
     print("Finished writing data to .csv files")
